@@ -1,0 +1,143 @@
+package Sba2;
+
+public class Carmodel implements Comparable<Carmodel> {
+	private String carname;
+	int manuyear;
+	
+	public String grtcarname() {
+		return carname;
+	}
+
+	public void setCarname(String carname) {
+		this.carname = carname;
+	}
+
+	public int getManuyear() {
+		return manuyear;
+	}
+
+	public void setManuyear(int manuyear) {
+		this.manuyear = manuyear;
+	}
+
+	public Carmodel(String carname, int manuyear) {
+		super();
+		this.carname = carname;
+		this.manuyear = manuyear;
+	}
+
+	@Override
+	public String toString() {
+		return "Carmodel [carname=" + carname + ", manuyear=" + manuyear + "]";
+	}
+
+	public Carmodel() {
+		
+
+	}
+	@Override
+	public int compareTo(Carmodel o) {
+		return o.manuyear-this.manuyear;
+	}
+
+}
+-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------
+package Sba2;
+import java.util.List;
+
+public class Showroom {
+	private String showroomname;
+	private int address;
+	List<Carmodel>Carmodels;
+
+	public String getShowroomname() {
+		return showroomname;
+	}
+
+	public void setShowroomname(String showroomname) {
+		this.showroomname = showroomname;
+	}
+
+	public int getAddress() {
+		return address;
+	}
+
+	public void setAddress(int address) {
+		this.address = address;
+	}
+
+	public List<Carmodel> getCarmodels() {
+		return Carmodels;
+	}
+
+	public void setCarmodels(List<Carmodel> carmodels) {
+		this.Carmodels = carmodels;
+	}
+
+	public Showroom(String showroomname, int address, List<Carmodel> carmodels) {
+		super();
+		this.showroomname = showroomname;
+		this.address = address;
+		this.Carmodels = carmodels;
+	}
+
+	@Override
+	public String toString() {
+		return "Showroom [showroomname=" + showroomname + ", address=" + address + ", Carmodels=" + Carmodels + "]";
+	}
+	public Showroom() {
+
+	}
+
+}
+-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------
+package Sba2;
+import java.util.List;
+
+public class Showroom {
+	private String showroomname;
+	private int address;
+	List<Carmodel>Carmodels;
+
+	public String getShowroomname() {
+		return showroomname;
+	}
+
+	public void setShowroomname(String showroomname) {
+		this.showroomname = showroomname;
+	}
+
+	public int getAddress() {
+		return address;
+	}
+
+	public void setAddress(int address) {
+		this.address = address;
+	}
+
+	public List<Carmodel> getCarmodels() {
+		return Carmodels;
+	}
+
+	public void setCarmodels(List<Carmodel> carmodels) {
+		this.Carmodels = carmodels;
+	}
+
+	public Showroom(String showroomname, int address, List<Carmodel> carmodels) {
+		super();
+		this.showroomname = showroomname;
+		this.address = address;
+		this.Carmodels = carmodels;
+	}
+
+	@Override
+	public String toString() {
+		return "Showroom [showroomname=" + showroomname + ", address=" + address + ", Carmodels=" + Carmodels + "]";
+	}
+	public Showroom() {
+
+	}
+
+}

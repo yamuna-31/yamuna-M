@@ -1,0 +1,137 @@
+package Sba2;
+
+public class Carmodel {
+	private String carname;
+	int manuyear;
+	
+	public String grtcarname() {
+		return carname;
+	}
+
+	public void setCarname(String carname) {
+		this.carname = carname;
+	}
+
+	public int getManuyear() {
+		return manuyear;
+	}
+
+	public void setManuyear(int manuyear) {
+		this.manuyear = manuyear;
+	}
+
+	public Carmodel(String carname, int manuyear) {
+		super();
+		this.carname = carname;
+		this.manuyear = manuyear;
+	}
+
+	@Override
+	public String toString() {
+		return "Carmodel [carname=" + carname + ", manuyear=" + manuyear + "]";
+	}
+
+	public Carmodel() {
+		
+
+	}
+
+}
+-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------
+package Sba2;
+import java.util.List;
+
+public class Showroom {
+	private String showroomname;
+	private int address;
+	List<Carmodel>Carmodels;
+
+	public String getShowroomname() {
+		return showroomname;
+	}
+
+	public void setShowroomname(String showroomname) {
+		this.showroomname = showroomname;
+	}
+
+	public int getAddress() {
+		return address;
+	}
+
+	public void setAddress(int address) {
+		this.address = address;
+	}
+
+	public List<Carmodel> getCarmodels() {
+		return Carmodels;
+	}
+
+	public void setCarmodels(List<Carmodel> carmodels) {
+		Carmodels = carmodels;
+	}
+
+	public Showroom(String showroomname, int address, List<Carmodel> carmodels) {
+		super();
+		this.showroomname = showroomname;
+		this.address = address;
+		Carmodels = carmodels;
+	}
+
+	@Override
+	public String toString() {
+		return "Showroom [showroomname=" + showroomname + ", address=" + address + ", Carmodels=" + Carmodels + "]";
+	}
+	public Showroom() {
+
+	}
+
+}
+-------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------
+package Sba2;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Maincar {
+	Map<String,java.util.List<Carmodel>>
+	carstore;
+	public void displaycarbyshowroomname(String showerroomname)
+	{
+		java.util.List<Carmodel>carmodels=carstore.get(showerroomname);
+		for(Carmodel car:carmodels) {
+			System.out.println(car);
+		}
+	}
+	public static void main(String[] args) {
+		Carmodel c1=new Carmodel("benz",1998);
+		Carmodel c2=new Carmodel("maruthi",1994);
+        Carmodel c3=new Carmodel("audi",1983);
+	    Carmodel c4=new Carmodel("ford",1999);
+	java.util.List<Carmodel>Carmodels=new ArrayList<Carmodel>();
+	Carmodels.add(c1);
+	Carmodels.add(c2);
+    Carmodels.add(c3);
+   Carmodels.add(c4);
+    Showroom Showroom=new Showroom("realworld",876,Carmodels);
+     Carmodel c5=new Carmodel("kia",1995);
+	Carmodel c6=new Carmodel("scoda",1995);
+    Carmodel c7=new Carmodel("ertiga",1989);
+    java.util.List<Carmodel>carmodels1=new ArrayList<Carmodel>();
+    Carmodels.add(c5);
+	Carmodels.add(c6);
+    Carmodels.add(c7);
+    Showroom Showroom1=new Showroom("carworld",234,Carmodels);
+    
+    Maincar s=new Maincar();
+    s.carstore=new
+    		HashMap<String,java.util.List<Carmodel>>();
+    s.carstore.put(Showroom.getShowroomname(),Showroom.getCarmodels());
+    s.carstore.put(Showroom1.getShowroomname(),Showroom1.getCarmodels());
+    s.displaycarbyshowroomname("realworld");
+	}
+}
+    
+    
+    

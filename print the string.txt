@@ -1,0 +1,14 @@
+package Sba2;
+public class Break {
+	
+
+	public static void main(String[] args) {
+		String str ="This@Is@Java@Programming";
+		String[] arrOfStr = str.split("@",7);
+		for(String a: arrOfStr)
+			System.out.println(a);
+		
+
+	}
+
+}
