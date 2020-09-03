@@ -1,0 +1,113 @@
+package com.myapp.model;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class Book {
+
+@Id
+private int isbn;
+private String title;
+private String author;
+public int getIsbn() {
+return isbn;
+}
+public void setIsbn(int isbn) {
+this.isbn = isbn;
+}
+public String getTitle() {
+return title;
+}
+public void setTitle(String title) {
+this.title = title;
+}
+public String getAuthor() {
+return author;
+}
+public void setAuthor(String author) {
+this.author = author;
+}
+public Book(int isbn, String title, String author) {
+super();
+this.isbn = isbn;
+this.title = title;
+this.author = author;
+}
+
+public Book() {
+// TODO Auto-generated constructor stub
+}
+@Override
+public String toString() {
+return "Book [isbn=" + isbn + ", title=" + title + ", author=" + author + "]";
+}
+
+}
+
+---------------------------------------------------
+
+
+package com.myapp.dao;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
+import com.myapp.model.Book;
+
+public class BookDao {
+
+
+public String saveBook(Book book)
+{
+try
+{
+SessionFactory factory=new Configuration().configure().buildSessionFactory();
+Session session= factory.openSession();
+Transaction tx=session.beginTransaction();
+session.save(book);
+tx.commit();
+return "book saved";
+}
+catch (Exception e) {
+// TODO: handle exception
+e.printStackTrace();
+}
+
+return "cannot save book";
+}
+
+
+}
+
+-----------------
+
+package com.myapp.service;
+
+import com.myapp.dao.BookDao;
+import com.myapp.model.Book;
+
+public class BookService {
+
+public static void main(String[] args) {
+
+Book book=new Book(101,"The Book","The AUthor");
+
+BookDao dao=new BookDao();
+System.out.println(dao.saveBook(book));
+
+
+}
+
+}
+
+
+
+
+
+
+
+
+

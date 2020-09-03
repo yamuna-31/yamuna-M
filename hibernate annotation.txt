@@ -1,0 +1,173 @@
+
+
+
+
+package com.myapp.model;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+@Entity
+public class Book {
+
+@Id
+private int isbn;
+private String title;
+private String author;
+
+@Column(name="book_date")
+private Date date;
+
+@Transient
+int copiesOfBook;
+
+@Embedded
+Publisher publisher;
+
+
+
+public Publisher getPublisher() {
+return publisher;
+}
+public void setPublisher(Publisher publisher) {
+this.publisher = publisher;
+}
+public int getCopiesOfBook() {
+return copiesOfBook;
+}
+public void setCopiesOfBook(int copiesOfBook) {
+this.copiesOfBook = copiesOfBook;
+}
+public Date getDate() {
+return date;
+}
+public void setDate(Date date) {
+this.date = date;
+}
+public int getIsbn() {
+return isbn;
+}
+public void setIsbn(int isbn) {
+this.isbn = isbn;
+}
+public String getTitle() {
+return title;
+}
+public void setTitle(String title) {
+this.title = title;
+}
+public String getAuthor() {
+return author;
+}
+public void setAuthor(String author) {
+this.author = author;
+}
+public Book(int isbn, String title, String author) {
+super();
+this.isbn = isbn;
+this.title = title;
+this.author = author;
+}
+
+
+
+
+public Book(int isbn, String title, String author, Date date) {
+super();
+this.isbn = isbn;
+this.title = title;
+this.author = author;
+this.date = date;
+}
+public Book() {
+// TODO Auto-generated constructor stub
+}
+@Override
+public String toString() {
+return "Book [isbn=" + isbn + ", title=" + title + ", author=" + author + ", dob=" + date + "]";
+}
+
+
+
+
+}
+
+
+-------------------------------------
+package com.myapp.model;
+
+import javax.persistence.Embeddable;
+
+@Embeddable
+public class Publisher {
+
+private String publisherId;
+
+private String publisherName;
+
+public String getPublisherId() {
+return publisherId;
+}
+
+public void setPublisherId(String publisherId) {
+this.publisherId = publisherId;
+}
+
+public String getPublisherName() {
+return publisherName;
+}
+
+public void setPublisherName(String publisherName) {
+this.publisherName = publisherName;
+}
+
+public Publisher(String publisherId, String publisherName) {
+super();
+this.publisherId = publisherId;
+this.publisherName = publisherName;
+}
+public Publisher() {
+// TODO Auto-generated constructor stub
+}
+}
+-------
+
+package com.myapp.service;
+
+import java.util.Date;
+
+import com.myapp.dao.BookDao;
+import com.myapp.model.Book;
+import com.myapp.model.Publisher;
+
+public class BookService {
+
+public static void main(String[] args) {
+
+Book book=new Book(101,"The Book","The AUthor",new Date());
+book.setCopiesOfBook(10);
+Publisher publisher=new Publisher("1", "ABC publications");
+book.setPublisher(publisher);
+BookDao dao=new BookDao();
+
+
+System.out.println(dao.saveBook(book));
+
+
+}
+
+}
+
+
+
+
+
+
+
+
+
