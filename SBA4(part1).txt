@@ -1,0 +1,689 @@
+Homecontroller
+
+package com.myspr.bean;
+
+
+
+import java.text.DateFormat;
+
+
+
+
+
+import java.util.Date;
+import java.util.Locale;
+
+import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
+import com.myspr.bean.dao.StudentDao;
+import com.myspr.bean.model.Student;
+
+@Controller
+public class HomeController {
+
+@Autowired
+StudentDao dao;
+
+
+
+@RequestMapping(value="/")
+public String home(Model model)
+{
+return "home";
+}
+
+	
+	  @RequestMapping(value="/display") 
+	  public String display(Model model,@ModelAttribute Student student) {
+		  String status=dao.saveStudent(student); 
+		  model.addAttribute("status",status); 
+		  return "display"; 
+		  }
+	 
+
+	
+	
+	
+	  @RequestMapping(value="/disp")
+	  public String value(Model model,@RequestParam("dept") String dept) {
+		  Student student=dao.searchdept(dept); 
+		  model.addAttribute("student",student);
+		  return "dispsearch";
+		  }
+	 
+
+
+	
+	
+	
+	  @RequestMapping(value="/disp1") 
+	  public String value1(Model model,@RequestParam("studentName") String studentName) {
+	  Student student=dao.searchname(studentName); 
+	  model.addAttribute("student",student);
+	  return "dispname"; 
+	  }
+	 
+
+	
+	  @RequestMapping(value="/disp2")
+	  public String value2(Model model,@RequestParam("studentName") String studentName) 
+	  {
+		  String status=dao.deletestudentName(studentName); 
+		  model.addAttribute("status",status); 
+		  return "display"; 
+		  }
+				 
+
+
+
+	
+	  @RequestMapping(value="/update") 
+	  public String update() {
+		  return "update"; 
+		  }
+	  
+	  
+	  int studentId=0;
+	  
+	  @RequestMapping(value="/searchForUpdate")
+	  public String searchForUpdate(Model model,@RequestParam("studentId") Integer studentId) { 
+		  int stuId=studentId;
+		  this.studentId=stuId; 
+		  Student student=dao.getStudentById(stuId);
+	  model.addAttribute(student);
+	  return "update"; 
+	  }
+	  
+	  
+	  @RequestMapping(value="/updateData") 
+	  public String updateData(@ModelAttribute Student student) { 
+		  student.setStudentId(studentId);
+	  
+	  dao.updateStudentById(student);
+	  return "update"; 
+	  }
+	 
+
+
+
+}
+----------------------------------------------------------------------------StudentDao
+package com.myspr.bean.dao;
+import javax.transaction.Transactional;
+
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.myspr.bean.model.Student;
+
+    
+	
+	@Transactional
+	public class StudentDao {
+
+
+	@Autowired
+	SessionFactory factory;
+
+
+	public StudentDao() {
+	// TODO Auto-generated constructor stub
+	}
+
+
+	public StudentDao(SessionFactory factory) {
+	super();
+	this.factory = factory;
+	}
+
+
+	public String saveStudent(Student student){
+	try{
+	Session session=factory.getCurrentSession();
+	session.save(student);
+	return "student Created";
+	}
+	catch (Exception e) {
+	// TODO: handle exception
+	e.printStackTrace();
+	}
+
+	return "cannot create student";
+	}
+
+	public Student searchdept(String dept) {
+		try {
+			Session session=factory.getCurrentSession();
+			Query query=session.createQuery("from Student d where d.dept=:dept");
+			query.setParameter("dept",dept);
+			Student student=(Student)query.list().get(0);
+			return student;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	public Student searchname(String studentName) {
+		try {
+			Session session=factory.getCurrentSession();
+			Query query=session.createQuery("from Student a where a.studentName=:studentName");
+			query.setParameter("studentName",studentName);
+			Student student=(Student)query.list().get(0);
+			return student;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	public  String deletestudentName(String studentName) {
+		try {
+			Session session=factory.getCurrentSession();
+			Query query=session.createQuery(" delete from Student a where a.studentName=:studentName");
+			query.setParameter("studentName",studentName);
+			int count=query.executeUpdate();
+			if(count>0)
+			{
+				return "deleted";
+				
+			}
+		
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return "cannot delete";
+	}
+
+
+
+	
+	public Student getStudentById(int studentId){
+		try{
+		Session session=factory.getCurrentSession();
+		Student student=(Student)session.get(Student.class,studentId);
+		return student;
+		}
+		catch (Exception e) {
+		// TODO: handle exception
+		e.printStackTrace();
+		}
+
+		return null;
+		}
+
+
+
+		public String updateStudentById(Student student){
+		try{
+		Session session=factory.getCurrentSession();
+
+		System.out.println("student "+student);
+		session.update("Student",student);
+		return "Student Updated";
+		}
+		catch (Exception e) {
+		// TODO: handle exception
+		e.printStackTrace();
+		}
+
+		return "Cannot Update student";
+		}
+
+
+
+	}
+	    
+-------------------------------------------------Student
+package com.myspr.bean.model;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class Student {
+	
+	@Id
+	int studentId;
+	String studentName;
+	String dept;
+	String clgname;
+	public int getStudentId() {
+		return studentId;
+	}
+	public void setStudentId(int studentId) {
+		this.studentId = studentId;
+	}
+	public String getStudentName() {
+		return studentName;
+	}
+	public void setStudentName(String studentName) {
+		this.studentName = studentName;
+	}
+	public String getDept() {
+		return dept;
+	}
+	public void setDept(String dept) {
+		this.dept = dept;
+	}
+	public String getClgname() {
+		return clgname;
+	}
+	public void setClgname(String clgname) {
+		this.clgname = clgname;
+	}
+	public Student(int studentId, String studentName, String dept, String clgname) {
+		super();
+		this.studentId = studentId;
+		this.studentName = studentName;
+		this.dept = dept;
+		this.clgname = clgname;
+	}
+	@Override
+	public String toString() {
+		return "Student [studentId=" + studentId + ", studentName=" + studentName + ", dept=" + dept + ", clgname="
+				+ clgname + "]";
+	}
+	
+	public Student() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	
+
+}
+---------------------------------------------------------hibernatecfg
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>        
+  <session-factory>
+    <property name="hibernate.dialect">org.hibernate.dialect.OracleDialect</property>
+    <property name="show_sql">true</property>
+    <property name="hibernate.connection.pool_size">1</property>
+    <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+    <property name="hbm2ddl.auto">update</property>
+
+    <mapping class="com.myspr.bean.model.Student"/>
+
+  </session-factory>
+</hibernate-configuration>
+----------------------------------------------servlet.context
+?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:mvc="http://www.springframework.org/schema/mvc"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://www.springframework.org/schema/beans"
+xmlns:context="http://www.springframework.org/schema/context"
+xmlns:tx="http://www.springframework.org/schema/tx"
+xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+
+<!-- Enables the Spring MVC @Controller programming model -->
+<mvc:annotation-driven />
+
+<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+<mvc:resources mapping="/resources/**" location="/resources/" />
+
+<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<property name="prefix" value="/WEB-INF/views/" />
+<property name="suffix" value=".jsp" />
+</bean>
+
+<context:component-scan base-package="com.myspr.bean" />
+
+
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+        <property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:xe"/>
+        <property name="username" value="yam"/>
+        <property name="password" value="pass"/>
+    </bean>
+   
+    <bean id="sessionFactory"
+        class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+<property name="configLocation" value="classpath:hibernate.cfg.xml" />
+    </bean>
+   
+    <tx:annotation-driven />
+
+    <bean id="transactionManager"
+        class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+ 
+<bean id="studentDao" class="com.myspr.bean.dao.StudentDao">
+   <constructor-arg>
+       <ref bean="sessionFactory" />
+   </constructor-arg>
+</bean>    
+</beans>
+
+
+
+----------------------------------pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<modelVersion>4.0.0</modelVersion>
+<groupId>net.codejava</groupId>
+<artifactId>SpringMvcHibernateXML</artifactId>
+<name>SpringMvcHibernateXML</name>
+<packaging>war</packaging>
+<version>1.0.0-BUILD-SNAPSHOT</version>
+
+<properties>
+<java-version>1.7</java-version>
+<org.springframework-version>4.0.3.RELEASE</org.springframework-version>
+</properties>
+
+<dependencies>
+
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjrt</artifactId>
+    <version>1.6.11</version>
+</dependency>
+
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>1.7.23</version>
+</dependency>
+
+
+
+<!-- Spring -->
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-context</artifactId>
+<version>${org.springframework-version}</version>
+</dependency>
+
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-webmvc</artifactId>
+<version>${org.springframework-version}</version>
+</dependency>
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-orm</artifactId>
+<version>${org.springframework-version}</version>
+<type>jar</type>
+<scope>compile</scope>
+</dependency>
+
+<!-- Hibernate -->
+<dependency>
+<groupId>org.hibernate</groupId>
+<artifactId>hibernate-core</artifactId>
+<version>4.3.5.Final</version>
+</dependency>
+
+<!-- Servlet -->
+<dependency>
+<groupId>javax.servlet</groupId>
+<artifactId>javax.servlet-api</artifactId>
+<version>3.1.0</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>javax.servlet.jsp</groupId>
+<artifactId>javax.servlet.jsp-api</artifactId>
+<version>2.3.1</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>jstl</groupId>
+<artifactId>jstl</artifactId>
+<version>1.2</version>
+</dependency>
+
+<!-- Apache Database Connection Pool -->
+<!-- https://mvnrepository.com/artifact/commons-dbcp/commons-dbcp -->
+<dependency>
+   <groupId>commons-dbcp</groupId>
+   <artifactId>commons-dbcp</artifactId>
+   <version>1.4</version>
+</dependency>
+ 
+</dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <additionalProjectnatures>
+                        <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
+                    </additionalProjectnatures>
+                    <additionalBuildcommands>
+                        <buildcommand>org.springframework.ide.eclipse.core.springbuilder</buildcommand>
+                    </additionalBuildcommands>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <compilerArgument>-Xlint:all</compilerArgument>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>org.test.int1.Main</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+-----------------------home.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+<h1>
+Hello Student PLz Provide ur Details!  
+</h1>
+<form action="display">
+
+<br>
+<br>
+Id      :<input type="text" name="studentId">
+<br>
+<br>
+Name    : <input type="text" name="studentName">
+<br>
+<br>
+Dept    : <input type="text" name="dept">
+<br>
+<br>
+clgName : <input type="text" name="clgname">
+<br>
+<br>
+
+<input type="submit" name="save student">
+
+</form>
+
+<form action="update">
+<input type="submit" value="Update">
+</form>
+
+<br>
+Hello student PLz Provide ur dept name to search!  
+</h1>
+<form action="disp">
+<br>
+<br>
+
+Name:<input type="text" name="dept">
+
+<br>
+<br>
+<input type="submit" name="search">
+</form>
+
+<br>
+
+Hello student PLz Provide ur Name to search!  
+</h1>
+<form action="disp1">
+<br>
+<br>
+Name:<input type="text" name="studentName">
+<br>
+<br>
+<input type="submit" name="search">
+</form>
+
+<br>
+
+
+Hello student PLz Provide ur studentName to delete!  
+</h1>
+<form action="disp2">
+<br>
+<br>
+Name:<input type="text" name="studentName">
+<br>
+<br>
+<input type="submit" name="delete">
+</form>
+<br>
+
+</body>
+</html>
+------------------------------display.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+<h1>
+Hello world!  
+</h1>
+
+<P>  ${status} </P>
+</body>
+</html>
+-----------------------update.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Update</title>
+</head>
+<body>
+<h1>
+Hello Student PLz Update ur Details!  
+</h1>
+<form action="searchForUpdate">
+Id:<input type="text" name="studentId" value="${student.studentId}">
+<input type="submit" value="search">
+</form>
+
+<br>
+<br>
+
+<form action="updateData">
+Name:<input type="text" name="studentName" value="${student.studentName}">
+<br>
+<br>
+dept: <input type="text" name="city" value="${student.dept}">
+<br>
+<br>
+clgname: <input type="text" name="clgname" value="${student.clgname}">
+<br>
+<br>
+<input type="submit" value="update student">
+</form>
+
+</body>
+</html>
+-----------------------dispname.jasp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+<h1>
+Hello world!  
+</h1>
+<table>
+<P> StudentID: ${student.studentId} </P>
+<P> StudentNAME: ${student.studentName} </P>
+<P> DEPARTMENT: ${student.dept} </P>
+<P> COLLEGENAME: ${student.clgname} </P>
+</table>
+</body>
+</html>
+---------------------------------------dispsearch.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+<h1>
+Hello world!  
+</h1>
+<table>
+<P> StudentID: ${student.studentId} </P>
+<P> StudentNAME: ${student.studentName} </P>
+<P> DEPARTMENT: ${student.dept} </P>
+<P> COLLEGENAME: ${student.clgname} </P>
+</table>
+</body>
+</html>
