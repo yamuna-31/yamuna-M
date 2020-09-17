@@ -1,0 +1,1070 @@
+Home controller
+
+
+package com.myboot.smvc;
+
+
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.myboot.smvc.dao.DxcUserDao;
+import com.myboot.smvc.model.DxcUser;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+@Controller
+public class HomeController {
+
+	@Autowired
+	DxcUserDao dao;
+
+	@RequestMapping(value = "/")
+	public String home() {
+
+		return "home";
+	}
+
+	@RequestMapping(value = "/newuser")
+	public String newUser(Model model) {
+		return "newuser";
+	}
+
+	@RequestMapping(value = "/display")
+	public String display(Model model, @ModelAttribute DxcUser dxcuser) {
+		String status = dao.saveDxcUser(dxcuser);
+		model.addAttribute("status", status);
+		return "display";
+	}
+
+	@RequestMapping(value = "/home")
+	public String home(Model model) {
+		return "home";
+	}
+
+	int userId = 0;
+
+	@RequestMapping(value = "/validate")
+	public String display1(Model model, @RequestParam("userId") String userId,
+			@RequestParam("password") String password) {
+		int userid = Integer.parseInt(userId);
+		this.userId = userid;
+		DxcUser dxcuser = dao.getUserById(userid);
+		String Pass = dxcuser.getPassword();
+		System.out.println(Pass);
+		System.out.println(password);
+		System.out.println(dxcuser);
+
+		if ((dxcuser != null) && (Pass.equals(password))) {
+
+			System.out.println("login successful");
+			return "success";
+		} else {
+			System.out.println("failed");
+			return "faillogin";
+		}
+	}
+
+	@RequestMapping(value = "/forgot")
+	public String newUser1(Model model) {
+		return "forgot";
+	}
+
+	@RequestMapping(value = "/change")
+	public String passwordModification(Model model, @RequestParam("userId") String userId,
+			@RequestParam("security_question") String security_question,
+			@RequestParam("security_answer") String security_answer) {
+		int userid = Integer.parseInt(userId);
+		this.userId = userid;
+		DxcUser dxcuser = dao.getUserById(userid);
+		String dxcSecurity_question = dxcuser.getSecurity_question();
+		String dxcSecurity_answer = dxcuser.getSecurity_answer();
+
+		System.out.println(dxcSecurity_question);
+		System.out.println(dxcSecurity_answer);
+		System.out.println(dxcuser);
+
+		if ((dxcuser != null) && (dxcSecurity_answer.equalsIgnoreCase(security_answer))
+				&& (dxcSecurity_question.equalsIgnoreCase(security_question))) {
+			model.addAttribute("userId", userId);
+			System.out.println("login successful");
+			return "changepage";
+		} else {
+			System.out.println("failed");
+			return "invalid";
+		}
+	}
+
+	DxcUser dxcuser;
+
+	@RequestMapping(value = "/check1")
+	public String CheckPassword(Model model,
+			/* @RequestParam("userId") Integer userId, */@RequestParam("password") String password,
+			@RequestParam("conformpassword") String conformpassword) {
+		System.out.println(password);
+		System.out.println(conformpassword);
+		if (password.equals(conformpassword)) {
+			model.addAttribute("userId", userId);
+			/* System.out.println(userId); */
+			model.addAttribute("password", password);
+			dao.updateUser(password);
+			System.out.println("login successful");
+			return "successchange";
+		} else {
+			System.out.println("failed");
+			return "check";
+		}
+	}
+
+	@RequestMapping(value = "/change1")
+	public String newUser2(Model model) {
+		return "changepage";
+	}
+
+}
+--------------------------------------------------------------------
+configclass
+
+-
+package com.myboot.smvc;
+
+import javax.persistence.EntityManagerFactory;
+
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+@EnableTransactionManagement
+@Configuration
+public class ConfigClass {
+
+@Autowired
+EntityManagerFactory entityManagerFactory;
+
+@Bean
+public SessionFactory getSessionFactory(){
+return entityManagerFactory.unwrap(SessionFactory.class);
+}
+
+}
+---------------------------------------------------sbaSMVCApplication
+package com.myboot.smvc;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SbaSmvcApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SbaSmvcApplication.class, args);
+	}
+
+}
+---------------------------------------DxuserDao
+package com.myboot.smvc.dao;
+import java.util.List;
+
+
+import javax.transaction.Transactional;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.myboot.smvc.model.DxcUser;
+
+
+
+@Component
+@Transactional
+public class DxcUserDao {
+	
+	@Autowired
+	SessionFactory factory;
+
+
+	public DxcUserDao() {
+	// TODO Auto-generated constructor stub
+	}
+
+
+	public DxcUserDao(SessionFactory factory) {
+	super();
+	this.factory = factory;
+	}
+	public String saveDxcUser(DxcUser dxcuser){
+		try{
+		Session session=factory.getCurrentSession();
+		session.save(dxcuser);
+		return "dxcuser Created";
+		}
+		catch (Exception e) {
+		// TODO: handle exception
+		e.printStackTrace();
+		}
+
+		return "cannot create dxcuser";
+		}
+
+
+		public DxcUser getUserById(int userId){
+			try{
+				Session session=factory.getCurrentSession();
+				DxcUser dxcuser=(DxcUser)session.get(DxcUser.class,userId);
+			return dxcuser;
+			}
+			catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			}
+			return null;
+			}
+		
+		public String updateUser(String password){
+			try{
+			Session session=factory.getCurrentSession();
+			/* System.out.println("dxcuser"+userId); */
+			System.out.println("myuser"+password);
+			Query query=session.createQuery("update MyUser as a set a.password=:password ");
+			System.out.println(query);
+		    int pwd=query.setString("password", password).executeUpdate();
+		    
+			return "Password Updated";
+			}
+			catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			}
+			return "Cannot Update Password";
+			}
+
+
+		
+		
+	
+
+}
+------------------------------DxcUsermodel
+package com.myboot.smvc.model;
+
+
+import javax.persistence.Entity;
+
+import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+@Entity
+public class DxcUser {
+	
+	@Id
+	private int userId ;
+	private String userName;
+	private String password;
+	private String security_question;
+	private String security_answer;
+	public int getUserId() {
+		return userId;
+	}
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public  String getSecurity_question() {
+		return security_question;
+	}
+	public void setSecurity_question(String security_question) {
+		this.security_question = security_question;
+	}
+	public String getSecurity_answer() {
+		return security_answer;
+	}
+	public void setSecurity_answer(String security_answer) {
+		this.security_answer = security_answer;
+	}
+	public DxcUser(int userId, String userName, String password, String security_question, String security_answer) {
+		super();
+		this.userId = userId;
+		this.userName = userName;
+		this.password = password;
+		this.security_question = security_question;
+		this.security_answer = security_answer;
+	}
+	@Override
+	public String toString() {
+		return "MyUser [userId=" + userId + ", userName=" + userName + ", password=" + password + ", security_question="
+				+ security_question + ", security_answer=" + security_answer + "]";
+	}
+	
+	public DxcUser() {
+		// TODO Auto-generated constructor stub
+	}
+}
+------------------------apllication property
+
+server.port=2211
+spring.mvc.view.suffix=.jsp
+spring.mvc.view.prefix=/views/
+
+# Keep the connection alive if idle for a long time (needed in production)
+spring.datasource.testWhileIdle = true
+spring.datasource.validationQuery = SELECT 1
+
+spring.jpa.show-sql = true
+
+spring.jpa.properties.hibernate.current_session_context_class=org.springframework.orm.hibernate4.SpringSessionContext
+
+
+spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+spring.jpa.hibernate.naming.physical-strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.OracleDialect
+spring.jpa.hibernate.ddl-auto=update
+
+# Oracle settings
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+spring.datasource.username=yam
+spring.datasource.password=pass
+spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver
+# logging
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
+logging.level.org.hibernate.SQL=debug
+
+
+
+
+---------------------------------------changepage.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+<%-- <link href="<c:url value="/resources/css/style.css"/>"rel="stylesheet"> --%>
+<center>
+ <%-- <img src="${pageContext.request.contextPath}/resources/img/faculty.jfif" style="height:60%;width:80%;"> --%>
+ </center>
+<table align="center">  
+<form action="check1">
+<h1 align="center">Change password here.....</h1>
+<div id="box"></div>
+<!-- <input type="text" name="userId" placeholder="userId">
+ --><br>
+<br>
+<input type="password" name="password" placeholder="password">
+<br>
+<br>
+<input type="password" name="conformpassword" placeholder="conformpassword">
+<br>
+<br>
+
+<input type="submit"/>
+</form>
+
+</center>
+</body>
+</html>
+------------------checkpassword.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</style>
+<script type="text/javascript">
+alert('login sucessfully!);
+</script>
+</head>
+<h1>password or conform password is invaild</h1>
+<h2>please provide vaild  password</h2>
+<body>
+<form action="change1">
+<input type="submit"  value="back">
+</form>
+
+</body>
+</html>
+
+----------------display.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</style>
+<script type="text/javascript">
+alert('Thank you for register Your details are registered successfully!');
+</script>
+</head>
+<body>
+<form action="home">
+<input type="submit"  value="Return to Login Page">
+</form>
+
+</body>
+</html>
+
+----------------------faillogin.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</style>
+<script type="text/javascript">
+alert('login sucessfully!);
+</script>
+</head>
+<h1>login sucessfully</h1>
+<h2>Welcom user</h2>
+<body>
+<form action="home">
+<input type="submit"  value="back to home">
+</form>
+
+</body>
+</html>
+-----------------------------------forgot.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+<%-- <link href="<c:url value="/resources/css/style.css"/>"rel="stylesheet"> --%>
+<center>
+ <%-- <img src="${pageContext.request.contextPath}/resources/img/faculty.jfif" style="height:60%;width:80%;"> --%>
+ </center>
+<table asslign="center">  
+
+<h1 align="center">user please provide details here....</h1>
+<form action="change">
+<input type="text" name="userId" placeholder="userId">
+<br>
+<br>
+<select name="security_question" >
+<option value="In what city your mother born?">In what city your mother born?</option>
+<option value="Which is your first phone name?">Which is your first phone name?</option>
+<option value="What is your childhood nick name?">What is your childhood nick name?</option>
+<option value="What is the last 5 digits of your mother phone number ?">What is the last 5 digits of your mother phone number?</option>
+<option value="Who was your childhood hero?">Who was your childhood hero?</option>
+
+</select>
+
+<br>
+<br>
+<input type="text" name="security_answer" placeholder="security_answer">
+
+<input type="submit" value="change password" class="btn btn-info mybtn"/>
+</form>
+
+</center>
+</body>
+</html>
+-----------------------------home.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+	
+}
+
+
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+<%-- <link href="<c:url value="/resources/css/style.css"/>"rel="stylesheet"> --%>
+<center>
+<%-- <img src="${pageContext.request.contextPath}/resources/img/faculty.jfif" style="height:60%;width:80%;"> --%>
+ </center>
+<table align="center">  
+<form action="validate">
+<h1 align="center">WELCOME TO DXC TECHNOLOGY</h1>
+<div id="box"></div>
+<input type="text" name="userId" placeholder="userId">
+<br>
+<br>
+<input type="password" name="password" placeholder="password">
+<br>
+<br>
+<input class="btn btn-primary" type="submit" value="Signin">
+<!-- <input type="submit" value="login" class="btn btn-info mybtn"/> -->
+</form>
+<form action="newuser">
+<br>
+<br>
+<input type="submit" value="create account" class="btn btn-info mybtn"/>
+<br>
+<br>
+</form>
+<form action="forgot">
+<input type="submit" value="forgot password"/>
+<br>
+<br>
+</form>
+
+</center>
+</body>
+</html>
+----------------invalid.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</style>
+<script type="text/javascript">
+alert('invalid!);
+</script>
+</head>
+<h1>invalid security question or answer </h1>
+<h2></h2>
+<body>
+<form action="forgot">
+<input type="submit"  value="got to forgot">
+</form>
+
+</body>
+</html>
+---------------------loginpage.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>s
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="css/main.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+<link href="<c:url value="/resources/css/Style.css"/>"rel="stylesheet">
+<title>Home</title>
+</head>
+<form  action="validateUser">
+<section class="form-dark">
+<div class="card card-image"
+style=" width: 40rem;">
+    <div class="text-white rgba-stylish-strong py-5 px-5 z-depth-4">
+      <div class="text-center">
+        <h3 class="white-text mb-5 mt-4 font-weight-bold"><strong>WELCOME TO</strong> <a
+            class="green-text font-weight-bold"><strong> DXC TECHNOLOGY </strong></a></h3>
+      </div>
+
+      <div class="md-form">
+        <input type="text" name="userId" placeholder="USER ID" id="Form-email5" class="form-control white-text">
+        <label for="Form-email5">USER ID</label>
+      </div>
+ <div class="md-form pb-3">
+        <input type="password" name="password" placeholder="PASSWORD"id="Form-pass5" class="form-control white-text">
+        <label for="Form-pass5">PASSWORD</label>
+        <div class="form-check my-4">
+       
+          <input class="form-check-input" type="checkbox" value="" id="defaultCheck17">
+          <label class="form-check-label white-text" for="defaultCheck17">Accept the<a href="#"
+              class="green-text font-weight-bold"> Terms and Conditions</a></label>
+        </div>
+      </div>
+    
+      <div class="row d-flex align-items-center mb-4">
+        <div class="text-center mb-3 col-md-12">
+          <button type="submit" class="btn btn-success btn-block btn-rounded z-depth-1">Sign in</button><br>
+
+          <p class="font-small-white-text d-flex justify-content-center">Forgot Password?<a href="ForgotPassword" class="text-danger ml-1 font-weight-bold">click here</a></p>
+
+<p class="font-small white-text d-flex justify-content-center">Have an account? <a href="New User"
+            class="green-text ml-1 font-weight-bold"> Log in</a></p>
+     
+        </div>
+        </div>
+           
+      
+    </div>
+  </div>
+ 
+</section>
+
+<!-- <body class="container">
+<h1>Welcome to DXC Technology!</h1>
+<form class="form-horizontal"  action="validateUser">
+<div class="form-group">
+<label class="control-label col-sm-0.5" for="userId">USER ID:</label><input type="text" name="userId" placeholder="USER ID"><br><br><br>
+<label class="control-label col-sm-0.5" for="password">PASSWORD:</label><input type="password" name="password" placeholder="PASSWORD"><br><br><br>
+<input type="submit" class="btn btn-primary" value="LOGIN"><br><br>
+<a href="ForgotPassword" class="text-danger">FORGOT PASSWORD?</a>
+<br><br><a href="New User" class="text-primary">NEW USER?REGISTER HERE!</a>
+</div>
+</form> -->
+</form>
+</body>
+</html>
+-----------------newuser.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+
+<title>Home</title>
+</head>
+<body>
+<%-- <link href="<c:url value="/resources/css/style.css"/>"rel="stylesheet"> --%>
+<center>
+ <%-- <img src="${pageContext.request.contextPath}/resources/img/faculty.jfif" style="height:60%;width:80%;"> --%>
+ </center>
+<table align="center">  
+<form action="display">
+<h1 align="center">new user please provide details here....</h1>
+<div id="box"></div>
+<input type="text" name="userId" placeholder="userId">
+<br>
+<br>
+<input type="text" name="userName" placeholder="userName">
+<br>
+<br>
+<input type="password" name="password" placeholder="password">
+<br>
+<br>
+<select name="security_question" >
+<option value="In what city your mother born?">In what city your mother born?</option>
+<option value="Which is your first phone name?">Which is your first phone name?</option>
+<option value="What is your childhood nick name?">What is your childhood nick name?</option>
+<option value="What is the last 5 digits of your mother phone number ?">What is the last 5 digits of your mother phone number?</option>
+<option value="Who was your childhood hero?">Who was your childhood hero?</option>
+
+</select>
+
+<br>
+<br>
+<input type="text" name="security_answer" placeholder="security_answer">
+
+<input type="submit" value="login" class="btn btn-info mybtn"/>
+</form>
+
+</center>
+</body>
+</html>
+-------------------success.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/style.css"/>"rel="stylesheet">
+<title>Home</title>
+</style>
+<script type="text/javascript">
+alert('login sucessfully!);
+</script>
+</head>
+<h1>signined sucessfully</h1>
+<h2>Welcome user</h2>
+<body>
+<form action="home">
+<input type="submit"  value="back to home">
+</form>
+
+</body>
+</html>
+------------------successchange.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<style >
+body {
+
+	background-color:linen;
+	text-align:center;
+}
+
+h1{
+	
+	color: maroon;
+	margin-left: 40px;
+	text-align:center;
+	
+}
+h2{
+	color:maroon;
+	text-align:center;
+}
+ 
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+
+form{
+margin:60px;
+margin-top:15px;
+}
+form label{
+display: block;
+margin:10px 0px;
+}
+</style>
+<link href="<c:url value="/resources/css/style.css"/>"rel="stylesheet">
+<title>Home</title>
+</style>
+<script type="text/javascript">
+alert('login sucessfully!);
+</script>
+</head>
+<h1>password change sucessfully</h1>
+<h2>thank you</h2>
+<body>
+<form action="home">
+<input type="submit"  value="back to home">
+</form>
+
+</body>
+</html>
+
+
