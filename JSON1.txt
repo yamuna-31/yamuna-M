@@ -1,0 +1,73 @@
+{
+"prodId":"611",
+"prodName":"Unique",
+"price":"80",
+"descp":"Fragranced Liquid Phenyl",
+"imgUrl":"assets/img/candh/unique.jpg"
+}
+{
+"prodId":"612",
+"prodName":"Breeze",
+"price":"281",
+"descp":"No Extra Scrubbing When Machine Washed",
+"imgUrl":"assets/img/candh/breeze.jpg"
+}
+{
+"prodId":"613",
+"prodName":"Vanish",
+"price":"199",
+"descp":"Liquid Fabric Stain Remover",
+"imgUrl":"assets/img/candh/vanish.jpg"
+}
+{
+"prodId":"614",
+"prodName":"Safe Wash",
+"price":"308",
+"descp":"Liquid Detergent",
+"imgUrl":"assets/img/candh/safe wash.jpg"
+}
+{
+"prodId":"615",
+"prodName":"Windex",
+"price":"347",
+"descp":"Glass Cleaner",
+"imgUrl":"assets/img/candh/Windex.jpg"
+}
+-------------------------------------------------herbs
+{
+"prodId":"711",
+"prodName":"Coriander",
+"price":"20",
+"descp":"Rich in taste",
+"imgUrl":"assets/img/herbs/coriander.jpg"
+}
+{
+"prodId":"712",
+"prodName":"Spinach",
+"price":"15",
+"descp":"Garden Spinach",
+"imgUrl":"assets/img/herbs/spinach.jpg"
+}
+{
+"prodId":"713",
+"prodName":"Pudina",
+"price":"10",
+"descp":"Antioxidant Mint",
+"imgUrl":"assets/img/herbs/Pudina.jpg"
+}
+{
+"prodId":"714",
+"prodName":"Arugula",
+"price":"50",
+"descp":"Herbaceous Arugula",
+"imgUrl":"assets/img/herbs/arugula.jpg"
+}
+{
+"prodId":"715",
+"prodName":"Kale",
+"price":"100",
+"descp":"Rosette Kale",
+"imgUrl":"assets/img/herbs/kale.jpg"
+}
+
+
