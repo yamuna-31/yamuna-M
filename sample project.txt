@@ -1,0 +1,337 @@
+ConfigClass
+
+
+package com.demo.project;
+import javax.persistence.EntityManagerFactory;
+
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+@EnableTransactionManagement
+@Configuration
+public class ConfigClass {
+
+@Autowired
+EntityManagerFactory entityManagerFactory;
+
+@Bean
+public SessionFactory getSessionFactory(){
+return entityManagerFactory.unwrap(SessionFactory.class);
+}
+
+}
+
+
+----------------------------------------------------------------Employee.model
+package com.demo.project.model;
+
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class Employee {
+
+@Id
+int employeeId;
+String employeeName;
+String status;
+int age;
+public int getEmployeeId() {
+return employeeId;
+}
+public void setEmployeeId(int employeeId) {
+this.employeeId = employeeId;
+}
+public String getEmployeeName() {
+return employeeName;
+}
+public void setEmployeeName(String employeeName) {
+this.employeeName = employeeName;
+}
+public String getStatus() {
+return status;
+}
+public void setStatus(String status) {
+this.status = status;
+}
+public int getAge() {
+return age;
+}
+public void setAge(int age) {
+this.age = age;
+}
+public Employee(int employeeId, String employeeName, String status, int age) {
+super();
+this.employeeId = employeeId;
+this.employeeName = employeeName;
+this.status = status;
+this.age = age;
+}
+
+public Employee() {
+// TODO Auto-generated constructor stub
+}
+@Override
+public String toString() {
+return "Patient [patientId=" + employeeId + ", employeeName=" + employeeName + ", status=" + status + ", age="
++ age + "]";
+}
+
+}
+-------------------------------------------------------EmployeeDao
+package com.demo.project.dao;
+
+
+import java.util.ArrayList;
+
+import javax.transaction.Transactional;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.demo.project.model.Employee;
+
+@Transactional
+@Component
+public class EmployeeDao {
+
+@Autowired
+SessionFactory sessionFactory;
+
+
+public String saveEmployee(Employee employee)
+{
+try
+{
+Session session=sessionFactory.getCurrentSession();
+session.save(employee);
+return "employee Saved";
+}
+catch (Exception e) {
+e.printStackTrace();
+}
+return "cannot create employee";
+}
+
+
+public String deleteEmployee(int employeeId)
+{
+try
+{
+Session session=sessionFactory.getCurrentSession();
+String hql="delete from Employee p where p.employeeId=:employeeId";
+Query query= session.createQuery(hql);
+query.setParameter("employeeId", employeeId);
+int res=query.executeUpdate();
+if(res>0)
+return "employee delete";
+else
+return "cannot find employee";
+
+}
+catch (Exception e) {
+e.printStackTrace();
+}
+return "cannot delete employee";
+}
+
+public Employee getEmployee(int employeeId)
+{
+try
+{
+Session session=sessionFactory.getCurrentSession();
+Employee employee= session.get(Employee.class, employeeId);
+return employee;
+}
+catch (Exception e) {
+e.printStackTrace();
+}
+return null;
+}
+
+public ArrayList<Employee> getAllEmployees()
+{
+try
+{
+Session session=sessionFactory.getCurrentSession();
+ArrayList<Employee>employees= (ArrayList<Employee>)session.createQuery("from Employee").list();
+return employees;
+}
+catch (Exception e) {
+e.printStackTrace();
+}
+return null;
+}
+
+
+public String updateEmployee(Employee employee)
+{
+try
+{
+Session session=sessionFactory.getCurrentSession();
+session.saveOrUpdate(employee);
+return "Employee Updated";
+}
+catch (Exception e) {
+e.printStackTrace();
+}
+return "Cannot Update Employee";
+}
+
+}
+
+------------------------------------------------------------------EmployeeController
+
+
+
+package com.demo.project.controller;
+
+
+import java.util.ArrayList;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.demo.project.dao.EmployeeDao;
+import com.demo.project.model.Employee;
+
+@RestController
+public class EmployeeController {
+
+@Autowired
+EmployeeDao employeeDao;
+
+@GetMapping("employee/{employeeId}")
+public Employee getEmployee(@PathVariable int employeeId)
+{
+return employeeDao.getEmployee(employeeId);
+
+}
+
+@GetMapping("employees")
+public ArrayList<Employee> getEmployees()
+{
+return employeeDao.getAllEmployees();
+
+}
+
+@PostMapping("employee")
+public String savePatient(@RequestBody Employee employee)
+{
+return employeeDao.saveEmployee(employee);
+}
+
+@PutMapping("employee")
+public String updateEmployee(@RequestBody Employee employee)
+{
+return employeeDao.updateEmployee(employee);
+}
+@DeleteMapping("employee")
+public String deleteEmployee(@RequestBody int employeeId)
+{
+
+System.out.println(employeeId);
+return employeeDao.deleteEmployee(employeeId);
+
+}
+}
+------------------------------------------------pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+<groupId>com.sample.project</groupId>
+	<artifactId>demo.sampleproject</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>demo.sampleproject</name>
+	<description>Demo project for Spring Boot</description>
+
+
+
+<properties>
+<java.version>1.8</java.version>
+</properties>
+
+
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.1.RELEASE</version>
+    </parent>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-jdbc</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-jasper -->
+<dependency>
+    <groupId>org.apache.tomcat</groupId>
+    <artifactId>tomcat-jasper</artifactId>
+    <version>8.5.11</version>
+</dependency>
+
+
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
+-------------------------------------------------------------application properties
+	server.port=2211
+
+# Keep the connection alive if idle for a long time (needed in production)
+spring.datasource.testWhileIdle = true
+spring.datasource.validationQuery = SELECT 1
+
+spring.jpa.show-sql = true
+
+spring.jpa.properties.hibernate.current_session_context_class=org.springframework.orm.hibernate4.SpringSessionContext
+
+
+spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+spring.jpa.hibernate.naming.physical-strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.OracleDialect
+spring.jpa.hibernate.ddl-auto=update
+
+# Oracle settings
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+spring.datasource.username=yam
+spring.datasource.password=pass
+spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver
+# logging
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
+logging.level.org.hibernate.SQL=debug
+
+--------------------------                    ----------------------------------
